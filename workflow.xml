@@ -1,0 +1,166 @@
+<workflow-app name="Sample Oozie Job" xmlns="uri:oozie:workflow:0.4">
+    <global>
+        <job-tracker>cdh1.local:8021</job-tracker>
+        <name-node>hdfs://cdh1.local</name-node>
+        <configuration>
+            <property>
+                <name>mapred.job.queue.name</name>
+                <value>default</value>
+            </property>
+            <property>
+                <name>mapred.speculative.execution</name>
+                <value>false</value>
+            </property>
+       </configuration>
+    </global>
+ 
+
+    <!-- Action to start with -->
+    <start to="fsAction"/>
+
+
+    <!-- File System Action -->
+    <action name="fsAction">
+        <fs>
+			<mkdir path='/user/cs/test/'>
+            <delete path='/user/cs/test/'>
+            <move source='/user/cs/test/' target='/user/cs/newtest/'/>
+        </fs>
+        <ok to="sshAction"/>
+        <error to="killAction"/>
+    </action>
+
+
+    <!-- SSH Action -->
+    <action name="sshAction">
+        <ssh xmlns="uri:oozie:ssh-action:0.1">
+              <host>cs@cdh1.local</host>
+              <command>scripts/testSshAction.sh</command>
+              <args>-inputValue</args>
+              <args>CS</args>
+              <capture-output/>
+        </ssh>
+        <ok to="javaAction"/>
+        <error to="killAction"/>
+    </action>
+
+
+    <!-- Java action -->
+    <action name="javaAction">
+        <java>
+            <prepare>
+                <delete path='/user/cs/test/'/>
+            </prepare>
+            <main-class>com.test.cs.driver</main-class>
+            <arg>'/user/cs/javaInput'</arg>
+            <arg>'/user/cs/javaOutput'</arg>
+            <capture-output/>
+        </java>
+        <ok to="hiveAction"/>
+        <error to="killAction"/>
+    </action>
+
+
+ 	<!-- hiveAction -->
+    <action name="hiveAction">
+         <hive xmlns="uri:oozie:hive-action:0.2">
+            <job-tracker>cdh1.local:8021</job-tracker>
+            <name-node>hcdh1.local:8021</name-node>   
+            <job-xml>hive-site.xml</job-xml>
+            <script>scripts/testHiveAction.hql</script>
+            <param>myParameter='myParameterValue'</param>
+        </hive>
+        <ok to="fork"/>
+        <error to="killAction"/>
+    </action>
+
+
+    <!-- Fork -->
+    <fork name="fork">
+    	<path start="sqoopAction" />
+    	<path start="pigAction" />
+    </fork>
+
+    
+    <!-- Sqoop Action -->
+    <action name="sqoopAction">
+	    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+	        <job-tracker>cdh1.local:8021</job-tracker>
+	        <name-node>hdfs://cdh1.local</name-node>
+	        <prepare>
+	            <delete path='/user/cs/test'/>
+	        </prepare>
+	        <command>import  --connect jdbc:sqlserver://testServer:12345 --username cs --password test --table Test --target-dir hdfs://cdh1.local:8020/user/cs/test -m 1 </command     
+	    </sqoop>
+        <ok to="join"/>
+        <error to="killAction"/>
+    </action>
+
+
+    <!-- Pig Action -->
+    <action name="pigAction">
+        <pig>
+            <job-tracker>cdh1.local:8021</job-tracker>
+            <name-node>[hdfs://cdh1.local</name-node>
+            <prepare>
+               <delete path='/user/cs/test'/>
+            </prepare>
+            <script>scripts/testScript.pig/script>            
+        </pig>
+        <ok to="join"/>
+        <error to="killAction"/>
+    </action>
+
+    
+	<!-- Join -->
+    <join name="join" to="mrAction" />
+    
+    
+	<!-- Map Reduce Action -->
+    <action name="mrAction">
+    	<map-reduce>
+            <prepare>
+                <delete path='/user/cs/test'/>
+            </prepare>
+			<configuration>
+			 <property>
+			   <name>mapreduce.map.class</name>
+			   <value>com.test.cs.mapper</value>
+			 </property>
+			 <property>
+			   <name>mapreduce.reduce.class</name>
+			   <value>com.test.cs.reducer</value>
+			 </property>			
+			 <property>
+			   <name>mapred.output.key.class</name>
+			   <value>org.apache.hadoop.io.Text</value>
+			 </property>
+			 <property>
+			   <name>mapred.output.value.class</name>
+			   <value>org.apache.hadoop.io.IntWritable</value>
+			 </property>
+			 <property>
+			   <name>mapred.input.dir</name>
+			   <value>/user/test/cs/input</value>
+			 </property>
+			 <property>
+			   <name>mapred.output.dir</name>
+			   <value>/user/test/cs/output</value>
+			 </property>
+			</configuration>
+    	</map-reduce>
+    	<ok to="end"/>
+        <error to="killAction"/>
+    </action>
+
+
+    <!-- Kill Action -->
+	<kill name="killAction">
+		<message>Job killed due to error - ${wf:errorMessage(wf:lastErrorNode())}</message>
+	</kill>
+
+
+	<!-- End -->
+    <end name="end" />
+
+ </workflow-app>
