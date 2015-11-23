@@ -116,7 +116,7 @@
             <prepare>
                 <delete path='/user/csingh/test'/>
             </prepare>
-		<configuration>
+	    <configuration>
 		 <property>
 		   <name>mapreduce.map.class</name>
 		   <value>com.test.csingh.mapper</value>
@@ -141,7 +141,7 @@
 		   <name>mapred.output.dir</name>
 		   <value>/user/test/csingh/output</value>
 		 </property>
-		</configuration>
+	    </configuration>
     	</map-reduce>
     	<ok to="end"/>
         <error to="killAction"/>
