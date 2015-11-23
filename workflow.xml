@@ -22,9 +22,9 @@
     <!-- File System Action -->
     <action name="fsAction">
         <fs>
-			<mkdir path='/user/csingh/test/'>
-            <delete path='/user/csingh/test/'>
-            <move source='/user/csingh/test/' target='/user/csingh/newtest/'/>
+        	<mkdir path='/user/csingh/test/'>
+            	<delete path='/user/csingh/test/'>
+            	<move source='/user/csingh/test/' target='/user/csingh/newtest/'/>
         </fs>
         <ok to="sshAction"/>
         <error to="killAction"/>
@@ -61,7 +61,7 @@
     </action>
 
 
- 	<!-- hiveAction -->
+    <!-- hiveAction -->
     <action name="hiveAction">
          <hive xmlns="uri:oozie:hive-action:0.2"> 
             <job-xml>hive-site.xml</job-xml>
@@ -106,11 +106,11 @@
     </action>
 
     
-	<!-- Join -->
+    <!-- Join -->
     <join name="join" to="mrAction" />
     
     
-	<!-- Map Reduce Action -->
+    <!-- Map Reduce Action -->
     <action name="mrAction">
     	<map-reduce>
             <prepare>
@@ -149,12 +149,12 @@
 
 
     <!-- Kill Action -->
-	<kill name="killAction">
-		<message>Job killed due to error - ${wf:errorMessage(wf:lastErrorNode())}</message>
-	</kill>
+    <kill name="killAction">
+	<message>Job killed due to error - ${wf:errorMessage(wf:lastErrorNode())}</message>
+    </kill>
 
 
-	<!-- End -->
+    <!-- End -->
     <end name="end" />
 
  </workflow-app>
