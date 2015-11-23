@@ -1,7 +1,7 @@
 <workflow-app name="Sample Oozie Job" xmlns="uri:oozie:workflow:0.4">
     <global>
-        <job-tracker>cdh1.local:8021</job-tracker>
-        <name-node>hdfs://cdh1.local</name-node>
+        <job-tracker>${jobTracker}<</job-tracker>
+        <name-node>${nameNode}</name-node>
         <configuration>
             <property>
                 <name>mapred.job.queue.name</name>
@@ -22,9 +22,9 @@
     <!-- File System Action -->
     <action name="fsAction">
         <fs>
-			<mkdir path='/user/cs/test/'>
-            <delete path='/user/cs/test/'>
-            <move source='/user/cs/test/' target='/user/cs/newtest/'/>
+			<mkdir path='/user/csingh/test/'>
+            <delete path='/user/csingh/test/'>
+            <move source='/user/csingh/test/' target='/user/csingh/newtest/'/>
         </fs>
         <ok to="sshAction"/>
         <error to="killAction"/>
@@ -34,10 +34,10 @@
     <!-- SSH Action -->
     <action name="sshAction">
         <ssh xmlns="uri:oozie:ssh-action:0.1">
-              <host>cs@cdh1.local</host>
+              <host>csingh@data1.cdh.local</host>
               <command>scripts/testSshAction.sh</command>
               <args>-inputValue</args>
-              <args>CS</args>
+              <args>some_input</args>
               <capture-output/>
         </ssh>
         <ok to="javaAction"/>
@@ -49,11 +49,11 @@
     <action name="javaAction">
         <java>
             <prepare>
-                <delete path='/user/cs/test/'/>
+                <delete path='/user/csingh/test/'/>
             </prepare>
-            <main-class>com.test.cs.driver</main-class>
-            <arg>'/user/cs/javaInput'</arg>
-            <arg>'/user/cs/javaOutput'</arg>
+            <main-class>com.test.csingh.driver</main-class>
+            <arg>'/user/csingh/javaInput'</arg>
+            <arg>'/user/csingh/javaOutput'</arg>
             <capture-output/>
         </java>
         <ok to="hiveAction"/>
@@ -63,9 +63,7 @@
 
  	<!-- hiveAction -->
     <action name="hiveAction">
-         <hive xmlns="uri:oozie:hive-action:0.2">
-            <job-tracker>cdh1.local:8021</job-tracker>
-            <name-node>hcdh1.local:8021</name-node>   
+         <hive xmlns="uri:oozie:hive-action:0.2"> 
             <job-xml>hive-site.xml</job-xml>
             <script>scripts/testHiveAction.hql</script>
             <param>myParameter='myParameterValue'</param>
@@ -85,12 +83,10 @@
     <!-- Sqoop Action -->
     <action name="sqoopAction">
 	    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
-	        <job-tracker>cdh1.local:8021</job-tracker>
-	        <name-node>hdfs://cdh1.local</name-node>
 	        <prepare>
-	            <delete path='/user/cs/test'/>
+	            <delete path='/user/csingh/test'/>
 	        </prepare>
-	        <command>import  --connect jdbc:sqlserver://testServer:12345 --username cs --password test --table Test --target-dir hdfs://cdh1.local:8020/user/cs/test -m 1 </command     
+	        <command>import  --connect jdbc:sqlserver://testServer:12345 --username csingh --password test --table Test --target-dir hdfs://cdh1.local:8020/user/csingh/test -m 1 </command     
 	    </sqoop>
         <ok to="join"/>
         <error to="killAction"/>
@@ -100,10 +96,8 @@
     <!-- Pig Action -->
     <action name="pigAction">
         <pig>
-            <job-tracker>cdh1.local:8021</job-tracker>
-            <name-node>[hdfs://cdh1.local</name-node>
             <prepare>
-               <delete path='/user/cs/test'/>
+               <delete path='/user/csingh/test'/>
             </prepare>
             <script>scripts/testScript.pig/script>            
         </pig>
@@ -120,16 +114,16 @@
     <action name="mrAction">
     	<map-reduce>
             <prepare>
-                <delete path='/user/cs/test'/>
+                <delete path='/user/csingh/test'/>
             </prepare>
 			<configuration>
 			 <property>
 			   <name>mapreduce.map.class</name>
-			   <value>com.test.cs.mapper</value>
+			   <value>com.test.csingh.mapper</value>
 			 </property>
 			 <property>
 			   <name>mapreduce.reduce.class</name>
-			   <value>com.test.cs.reducer</value>
+			   <value>com.test.csingh.reducer</value>
 			 </property>			
 			 <property>
 			   <name>mapred.output.key.class</name>
@@ -141,11 +135,11 @@
 			 </property>
 			 <property>
 			   <name>mapred.input.dir</name>
-			   <value>/user/test/cs/input</value>
+			   <value>/user/test/csingh/input</value>
 			 </property>
 			 <property>
 			   <name>mapred.output.dir</name>
-			   <value>/user/test/cs/output</value>
+			   <value>/user/test/csingh/output</value>
 			 </property>
 			</configuration>
     	</map-reduce>
