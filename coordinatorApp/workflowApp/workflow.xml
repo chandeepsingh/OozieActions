@@ -1,4 +1,4 @@
-<workflow-app name="Sample Oozie Job" xmlns="uri:oozie:workflow:0.4">
+<workflow-app name="Sample Oozie Workflow" xmlns="uri:oozie:workflow:0.4">
     <global>
         <job-tracker>${jobTracker}<</job-tracker>
         <name-node>${nameNode}</name-node>

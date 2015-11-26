@@ -10,3 +10,5 @@ OozieActions
 7. MR Action
 
 Fork and Join in #5 and #6
+
+Coordinator is set to run every day at 5am UTC.
