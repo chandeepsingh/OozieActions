@@ -15,4 +15,4 @@ Coordinator is set to run every day at 5am UTC
 
 <b>Submit coordinator:</b> oozie job -oozie http://oozie_host:11000/oozie -config your_path/coordinatorApp/coordinator.properties -run
 
-<b>Run workflow once:</b> oozie job -oozie http://oozie_host:11000/oozie -config your_path/coordinatorApp/workflowApp/job.properties -run
+<b>Run only workflow:</b> oozie job -oozie http://oozie_host:11000/oozie -config your_path/coordinatorApp/workflowApp/job.properties -run
